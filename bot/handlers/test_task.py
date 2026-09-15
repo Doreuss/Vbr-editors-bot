@@ -12,7 +12,7 @@ from bot.config import ADMIN_GROUP_ID, REVIEW_SLA_DAYS
 
 router = Router()
 
-TIKTOK_LINK_RE = re.compile(r"tiktok\.com", re.IGNORECASE)
+TIKTOK_LINK_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 
 _candidate_counter = {"n": 0}  # простая нумерация карточек в рамках процесса
 
@@ -31,6 +31,22 @@ async def on_start_test(message: Message, state: FSMContext):
     page_id = existing["id"]
     await nc.mark_test_started(page_id)
     await state.update_data(page_id=page_id)
+    await state.set_state(TestTask.waiting_for_submission)
+    await message.answer(
+        texts.SEND_VIDEO_OR_LINK_PROMPT,
+        reply_markup=_kb(texts.SEE_TASK_AGAIN_BTN, texts.FAQ_BTN),
+    )
+
+
+@router.message(F.text == texts.SEND_VIDEO_BTN)
+async def on_send_video_button(message: Message, state: FSMContext):
+    """Кнопка показывается при возврате в бот (тест уже начат, но не отправлен).
+    Раньше не имела обработчика — состояние диалога терялось, из-за чего
+    следующее сообщение (видео или ссылка) бот просто не видел."""
+    existing = await nc.find_candidate_by_telegram_id(message.from_user.id)
+    if not existing:
+        return
+    await state.update_data(page_id=existing["id"])
     await state.set_state(TestTask.waiting_for_submission)
     await message.answer(
         texts.SEND_VIDEO_OR_LINK_PROMPT,

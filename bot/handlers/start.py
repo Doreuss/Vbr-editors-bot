@@ -28,6 +28,7 @@ def _kb(*buttons: str):
 
 @router.message(CommandStart())
 async def on_start(message: Message, command: CommandObject, state: FSMContext):
+    await state.clear()
     telegram_id = message.from_user.id
     existing = await nc.find_candidate_by_telegram_id(telegram_id)
 
