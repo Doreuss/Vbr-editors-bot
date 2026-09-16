@@ -18,7 +18,6 @@ REVIEW_SLA_DAYS = 3  # срок проверки, который видит ка
 
 TEST_REFERENCES = [
     "https://www.tiktok.com/@edits/video/7677310807947988232",
-    "https://www.tiktok.com/@edits/video/7676876555277202000",
     "https://www.tiktok.com/@edits/video/7676064935285247250",
 ]
 TEST_SOUND_URL = "https://tiktok.com/music/OMNISCIENT-SLOWED-683206697/80004880"
