@@ -162,7 +162,7 @@ async def q_contact(message: Message, state: FSMContext):
 
 async def send_test_task(message: Message, page_id: str, show_start_button: bool = True):
     text = texts.TEST_TASK_TEMPLATE.format(
-        ref1=TEST_REFERENCES[0], ref2=TEST_REFERENCES[1], ref3=TEST_REFERENCES[2],
+        ref1=TEST_REFERENCES[0], ref2=TEST_REFERENCES[1],
         sound=TEST_SOUND_URL,
     )
     kb = _kb(texts.START_TEST_BTN) if show_start_button else _kb(
