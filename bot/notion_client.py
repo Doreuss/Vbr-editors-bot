@@ -175,3 +175,24 @@ async def find_candidates_by_status(status: str) -> list[dict]:
             break
         cursor = resp.get("next_cursor")
     return results
+
+
+async def find_candidates_by_statuses(statuses: list[str]) -> list[dict]:
+    """Возвращает все страницы кандидатов, чей статус входит в список (с пагинацией)."""
+    results: list[dict] = []
+    cursor = None
+    or_filter = {"or": [{"property": "Статус", "select": {"equals": s}} for s in statuses]}
+    while True:
+        kwargs = {
+            "database_id": NOTION_DATABASE_ID,
+            "filter": or_filter,
+            "page_size": 100,
+        }
+        if cursor:
+            kwargs["start_cursor"] = cursor
+        resp = await notion.databases.query(**kwargs)
+        results.extend(resp.get("results", []))
+        if not resp.get("has_more"):
+            break
+        cursor = resp.get("next_cursor")
+    return results

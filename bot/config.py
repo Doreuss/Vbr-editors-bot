@@ -20,4 +20,5 @@ TEST_REFERENCES = [
     "https://www.tiktok.com/@edits/video/7677310807947988232",
     "https://www.tiktok.com/@edits/video/7676064935285247250",
 ]
-TEST_SOUND_URL = "https://tiktok.com/music/OMNISCIENT-SLOWED-683206697/80004880"
+TEST_SOUND_URL = "https://vt.tiktok.com/ZS9AY8Db5f3th-B1rDb/"
+TEST_SOUND_BACKUP_URL = "https://www.youtube.com/watch?v=r8IUoPHqPZU"  # запасной вариант, если ссылка на TikTok не открывается

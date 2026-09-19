@@ -6,10 +6,51 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardBut
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot import texts, notion_client as nc
-from bot.config import ADMIN_USER_IDS
+from bot.config import ADMIN_USER_IDS, TEST_SOUND_URL, TEST_SOUND_BACKUP_URL
 from bot.handlers.start import test_task_content
 
 router = Router()
+
+# Статусы кандидатов, которые уже получили тестовое, но ещё не отправили работу —
+# именно им могла прийти сломанная ссылка на звук.
+IN_PROGRESS_STATUSES = [
+    "Посмотрел тестовое",
+    "Начал тестовое",
+    "Получил напоминание",
+    "Черновик получен",
+]
+
+
+@router.message(Command("notify_sound_fix"))
+async def notify_sound_fix(message: Message):
+    """Разово уведомляет кандидатов, которые уже работают над тестовым (но ещё
+    не отправили результат), что ссылка на звук была рабочей и даёт запасной
+    вариант — на случай, если у кого-то TikTok-ссылка не открывается."""
+    if message.from_user.id not in ADMIN_USER_IDS:
+        return
+
+    candidates = await nc.find_candidates_by_statuses(IN_PROGRESS_STATUSES)
+    if not candidates:
+        await message.answer("Никого не нашлось — некому отправлять уведомление.")
+        return
+
+    await message.answer(f"Нашёл {len(candidates)} кандидат(ов) в процессе тестового. Начинаю рассылку…")
+
+    text = texts.SOUND_FIX_NOTICE.format(sound=TEST_SOUND_URL, sound_backup=TEST_SOUND_BACKUP_URL)
+    sent, failed = 0, 0
+    for page in candidates:
+        telegram_id = nc.get_telegram_id(page)
+        if not telegram_id:
+            failed += 1
+            continue
+        try:
+            await message.bot.send_message(telegram_id, text)
+            sent += 1
+        except Exception:
+            failed += 1
+        await asyncio.sleep(0.1)
+
+    await message.answer(f"Готово. Отправлено: {sent}. Не удалось: {failed}.")
 
 
 @router.message(Command("resend_test_task"))

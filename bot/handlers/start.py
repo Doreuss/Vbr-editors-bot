@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot import texts, notion_client as nc
 from bot.states import Ankета
-from bot.config import TEST_REFERENCES, TEST_SOUND_URL
+from bot.config import TEST_REFERENCES, TEST_SOUND_URL, TEST_SOUND_BACKUP_URL
 
 router = Router()
 
@@ -163,7 +163,7 @@ async def q_contact(message: Message, state: FSMContext):
 def test_task_content(show_start_button: bool = True):
     text = texts.TEST_TASK_TEMPLATE.format(
         ref1=TEST_REFERENCES[0], ref2=TEST_REFERENCES[1],
-        sound=TEST_SOUND_URL,
+        sound=TEST_SOUND_URL, sound_backup=TEST_SOUND_BACKUP_URL,
     )
     kb = _kb(texts.START_TEST_BTN) if show_start_button else _kb(
         texts.SEND_VIDEO_BTN, texts.SEE_TASK_AGAIN_BTN, texts.FAQ_BTN
