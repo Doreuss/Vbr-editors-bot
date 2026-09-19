@@ -145,3 +145,33 @@ async def cooldown_expired(page) -> bool:
 def get_status(page) -> str:
     sel = page["properties"].get("Статус", {}).get("select")
     return sel["name"] if sel else ""
+
+
+def get_telegram_id(page) -> int | None:
+    arr = page["properties"].get("Telegram ID", {}).get("rich_text", [])
+    if not arr:
+        return None
+    try:
+        return int(arr[0]["text"]["content"])
+    except (ValueError, KeyError):
+        return None
+
+
+async def find_candidates_by_status(status: str) -> list[dict]:
+    """Возвращает все страницы кандидатов с данным статусом (с пагинацией)."""
+    results: list[dict] = []
+    cursor = None
+    while True:
+        kwargs = {
+            "database_id": NOTION_DATABASE_ID,
+            "filter": {"property": "Статус", "select": {"equals": status}},
+            "page_size": 100,
+        }
+        if cursor:
+            kwargs["start_cursor"] = cursor
+        resp = await notion.databases.query(**kwargs)
+        results.extend(resp.get("results", []))
+        if not resp.get("has_more"):
+            break
+        cursor = resp.get("next_cursor")
+    return results

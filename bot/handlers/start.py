@@ -160,7 +160,7 @@ async def q_contact(message: Message, state: FSMContext):
     await send_test_task(message, data["page_id"])
 
 
-async def send_test_task(message: Message, page_id: str, show_start_button: bool = True):
+def test_task_content(show_start_button: bool = True):
     text = texts.TEST_TASK_TEMPLATE.format(
         ref1=TEST_REFERENCES[0], ref2=TEST_REFERENCES[1],
         sound=TEST_SOUND_URL,
@@ -168,5 +168,10 @@ async def send_test_task(message: Message, page_id: str, show_start_button: bool
     kb = _kb(texts.START_TEST_BTN) if show_start_button else _kb(
         texts.SEND_VIDEO_BTN, texts.SEE_TASK_AGAIN_BTN, texts.FAQ_BTN
     )
+    return text, kb
+
+
+async def send_test_task(message: Message, page_id: str, show_start_button: bool = True):
+    text, kb = test_task_content(show_start_button)
     await message.answer(text, reply_markup=kb)
     await nc.update_status(page_id, "Посмотрел тестовое")

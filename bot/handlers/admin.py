@@ -1,11 +1,48 @@
+import asyncio
+
 from aiogram import Router
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.filters import Command
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot import texts, notion_client as nc
 from bot.config import ADMIN_USER_IDS
+from bot.handlers.start import test_task_content
 
 router = Router()
+
+
+@router.message(Command("resend_test_task"))
+async def resend_test_task(message: Message):
+    """Разово рассылает тестовое задание кандидатам, застрявшим на статусе
+    'Заполнил анкету' — их зацепил баг с падением бота после анкеты
+    (KeyError на отсутствующем плейсхолдере {ref3} в шаблоне)."""
+    if message.from_user.id not in ADMIN_USER_IDS:
+        return
+
+    candidates = await nc.find_candidates_by_status("Заполнил анкету")
+    if not candidates:
+        await message.answer("Никого не нашлось — все кандидаты уже получили тестовое.")
+        return
+
+    await message.answer(f"Нашёл {len(candidates)} кандидат(ов) без тестового. Начинаю рассылку…")
+
+    text, kb = test_task_content()
+    sent, failed = 0, 0
+    for page in candidates:
+        telegram_id = nc.get_telegram_id(page)
+        if not telegram_id:
+            failed += 1
+            continue
+        try:
+            await message.bot.send_message(telegram_id, text, reply_markup=kb)
+            await nc.update_status(page["id"], "Посмотрел тестовое")
+            sent += 1
+        except Exception:
+            failed += 1
+        await asyncio.sleep(0.1)
+
+    await message.answer(f"Готово. Отправлено: {sent}. Не удалось: {failed}.")
 
 
 def decision_keyboard(page_id: str, candidate_telegram_id: int) -> InlineKeyboardMarkup:
