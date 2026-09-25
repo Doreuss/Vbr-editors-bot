@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardBut
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot import texts, notion_client as nc
-from bot.config import ADMIN_USER_IDS, TEST_SOUND_URL, TEST_SOUND_BACKUP_URL
+from bot.config import ADMIN_USER_IDS, TEST_SOUND_URL, TEST_SOUND_BACKUP_URL, GROUP_INVITE_LINK
 from bot.handlers.start import test_task_content
 
 router = Router()
@@ -127,4 +127,6 @@ async def on_decision(callback: CallbackQuery):
 
     # Пишем кандидату ТОЛЬКО если взяли. В остальных случаях — полная тишина.
     if action == "take":
-        await callback.bot.send_message(int(candidate_id), texts.ACCEPTED_MESSAGE)
+                await callback.bot.send_message(
+                                int(candidate_id), texts.ACCEPTED_MESSAGE.format(group_link=GROUP_INVITE_LINK)
+                )
