@@ -22,3 +22,5 @@ TEST_REFERENCES = [
 ]
 TEST_SOUND_URL = "https://vt.tiktok.com/ZS9AY8Db5f3th-B1rDb/"
 TEST_SOUND_BACKUP_URL = "https://www.youtube.com/watch?v=r8IUoPHqPZU"  # запасной вариант, если ссылка на TikTok не открывается
+
+GROUP_INVITE_LINK = "https://t.me/+q3oKWp4Q-XgyYTky"  # закрытая группа VBR Creators для принятых кандидатов
